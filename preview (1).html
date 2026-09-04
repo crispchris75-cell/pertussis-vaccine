@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>켄드릭과 엘더링의 백일해 백신 개발 타임라인 — Illustrated</title>
+<style>
+:root{
+  --bg1:#f4f7ff; --bg2:#fffdf7; --panel:#ffffff; --card:#ffffff; --text:#1f2937; --muted:#667085;
+  --border:#d8e0ee; --accent:#315fcb; --shadow:0 14px 34px rgba(49,95,203,.10);
+  --s1:#ffe08a; --s2:#a7dcff; --s3:#d8b6ff; --s4:#ffc5a2; --s5:#a8e2b5; --s6:#ffd0dc;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{
+  font-family:Arial,"Noto Sans KR",sans-serif; color:var(--text);
+  background:radial-gradient(circle at 0% 0%, #eaf1ff 0, transparent 28%),
+             radial-gradient(circle at 100% 0%, #fff2d9 0, transparent 26%),
+             linear-gradient(180deg,var(--bg1),var(--bg2));
+}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 44px}
+.hero{
+  position:relative; overflow:hidden; background:linear-gradient(135deg,#244db4,#4f79df); border-radius:28px;
+  color:#fff; padding:28px 24px 22px; box-shadow:0 18px 40px rgba(36,77,180,.18);
+}
+.hero::before,.hero::after{content:""; position:absolute; border-radius:999px; opacity:.15; pointer-events:none}
+.hero::before{width:220px;height:220px;right:-70px;top:-70px;background:#fff}
+.hero::after{width:150px;height:150px;left:-50px;bottom:-40px;background:#fff}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;opacity:.9}
+.hero-grid{display:grid;grid-template-columns:1.5fr .9fr;gap:18px;align-items:center}
+.hero h1{margin:8px 0 10px;font-size:clamp(1.7rem,3vw,2.5rem);line-height:1.2}
+.hero p{margin:0;font-size:15px;line-height:1.7;max-width:760px;color:rgba(255,255,255,.94)}
+.hero-icons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-self:stretch}
+.hero-icon{
+  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.24); border-radius:18px; padding:12px 10px; text-align:center;
+}
+.hero-icon .emoji{font-size:30px;line-height:1}
+.hero-icon .label{margin-top:8px;font-size:12px;font-weight:700;line-height:1.35}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+button{
+  min-height:44px;padding:0 15px;border-radius:12px;border:1px solid var(--border); background:#fff; color:var(--text); font-weight:800; cursor:pointer
+}
+button.primary{background:#0f2f84;color:#fff;border-color:#0f2f84}
+button.ghost{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.3)}
+.legend{
+  margin-top:18px;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow)
+}
+.legend-title{font-size:12px;font-weight:900;letter-spacing:.08em;color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.flow-chip{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#f7f9ff;border:1px solid var(--border);
+  border-radius:999px;font-size:13px;font-weight:800
+}
+.flow-chip .emoji{font-size:18px}
+.arrow{color:var(--muted);font-weight:900}
+.timeline{position:relative;margin-top:20px;padding-left:34px}
+.timeline::before{
+  content:"";position:absolute;left:15px;top:20px;bottom:16px;width:4px;border-radius:999px;background:linear-gradient(180deg,#c8d4ee,#dce5f7)
+}
+.stage{position:relative;margin-bottom:16px}
+.node{
+  position:absolute;left:-34px;top:18px;width:34px;height:34px;border-radius:50%; display:grid;place-items:center;
+  font-size:16px;border:4px solid #fff;box-shadow:0 0 0 1px var(--border)
+}
+.stage:nth-child(1) .node{background:var(--s1)} .stage:nth-child(2) .node{background:var(--s2)}
+.stage:nth-child(3) .node{background:var(--s3)} .stage:nth-child(4) .node{background:var(--s4)}
+.stage:nth-child(5) .node{background:var(--s5)} .stage:nth-child(6) .node{background:var(--s6)}
+.card{
+  width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:22px; padding:16px 18px;
+  box-shadow:var(--shadow);cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.card:hover{transform:translateY(-1px)} .card[aria-expanded="true"]{border-color:var(--accent);box-shadow:0 18px 38px rgba(49,95,203,.14)}
+.head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.badge{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:22px;border:1px solid rgba(0,0,0,.06)
+}
+.stage:nth-child(1) .badge{background:color-mix(in srgb,var(--s1) 55%, white)}
+.stage:nth-child(2) .badge{background:color-mix(in srgb,var(--s2) 55%, white)}
+.stage:nth-child(3) .badge{background:color-mix(in srgb,var(--s3) 55%, white)}
+.stage:nth-child(4) .badge{background:color-mix(in srgb,var(--s4) 55%, white)}
+.stage:nth-child(5) .badge{background:color-mix(in srgb,var(--s5) 55%, white)}
+.stage:nth-child(6) .badge{background:color-mix(in srgb,var(--s6) 55%, white)}
+.title{font-size:1.05rem;font-weight:900;line-height:1.3}
+.eng{display:block;margin-top:2px;font-size:.79rem;color:var(--muted);font-weight:700}
+.chev{font-size:1.2rem;color:var(--muted);transition:transform .18s ease}
+.card[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.detail{display:none;padding:14px 4px 2px 56px}
+.card[aria-expanded="true"] .detail{display:block}
+.detail p{margin:0;font-size:.95rem;line-height:1.78}
+.info-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:14px}
+.illustration{border:1px solid var(--border);border-radius:18px;padding:14px;background:linear-gradient(180deg,#fcfdff,#f7f9ff)}
+.illus-big{font-size:44px;line-height:1}
+.illus-title{margin-top:8px;font-weight:900;font-size:14px}
+.illus-text{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.6}
+.keywords{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center}
+.num{font-size:1.8rem;font-weight:950;line-height:1;color:#0f2f84}
+.stat-label{margin-top:5px;color:var(--muted);font-size:12px;font-weight:700;line-height:1.35}
+.footer-note{
+  margin-top:18px;padding:16px;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f8fbff); border:1px solid var(--border); box-shadow:var(--shadow)
+}
+.footer-note h3{margin:0;font-size:14px;letter-spacing:.08em;color:var(--muted)}
+.footer-note p{margin:8px 0 0;line-height:1.7}
+@media (max-width:900px){.hero-grid,.info-grid{grid-template-columns:1fr}.hero-icons{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:640px){
+  .hero-icons{grid-template-columns:repeat(2,1fr)} .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .detail{padding-left:0} .timeline{padding-left:0} .timeline::before,.node{display:none}
+}
+@media (prefers-reduced-motion:reduce){.card,.chev{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">PERTUSSIS VACCINE DEVELOPMENT · ILLUSTRATED TIMELINE</div>
+    <div class="hero-grid">
+      <div>
+        <h1>켄드릭과 엘더링의 백일해 백신 개발 타임라인</h1>
+        <p>세균 샘플 수집에서 시작해, 배양과 분석, 현장 방문, 후보 백신 개발, 자가 접종을 통한 안전성 검증, 그리고 1934–1935년 최초의 현장시험까지의 과정을 한눈에 볼 수 있도록 구성한 수업용 인터랙티브 자료입니다.</p>
+        <div class="actions">
+          <button class="primary" id="openAll">모두 펼치기</button>
+          <button id="closeAll">모두 접기</button>
+          <button class="ghost" id="firstOnly">1단계만 보기</button>
+        </div>
+      </div>
+      <div class="hero-icons">
+        <div class="hero-icon"><div class="emoji">🧫</div><div class="label">샘플 수집<br>Petri Dish</div></div>
+        <div class="hero-icon"><div class="emoji">🦠</div><div class="label">세균 군집<br>Colonies</div></div>
+        <div class="hero-icon"><div class="emoji">🧪</div><div class="label">실험과 분석<br>Analyze</div></div>
+        <div class="hero-icon"><div class="emoji">🏠</div><div class="label">가정 방문<br>Empathy</div></div>
+        <div class="hero-icon"><div class="emoji">💉</div><div class="label">자가 접종<br>Self-Testing</div></div>
+        <div class="hero-icon"><div class="emoji">📊</div><div class="label">현장시험 결과<br>Field Test</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="legend">
+    <div class="legend-title">THE WHOLE PROCESS</div>
+    <div class="flow">
+      <span class="flow-chip"><span class="emoji">🧫</span> samples</span><span class="arrow">→</span>
+      <span class="flow-chip"><span class="emoji">🧪</span> incubator</span><span class="arrow">→</span>
+      <span class="flow-chip"><span class="emoji">🦠</span> colonies</span><span class="arrow">→</span>
+      <span class="flow-chip"><span class="emoji">🔬</span> analysis</span><span class="arrow">→</span>
+      <span class="flow-chip"><span class="emoji">💡</span> potential vaccine</span><span class="arrow">→</span>
+      <span class="flow-chip"><span class="emoji">💉</span> safety check</span><span class="arrow">→</span>
+      <span class="flow-chip"><span class="emoji">📈</span> field test</span>
+    </div>
+  </section>
+
+  <section class="timeline" aria-label="백일해 백신 개발 6단계 타임라인">
+    <div class="stage">
+      <span class="node">1</span>
+      <button class="card" aria-expanded="true">
+        <span class="head"><span class="badge">🧫</span><span class="title">1단계 · 세균 샘플 수집 <span class="eng">Gathering Samples</span></span><span class="chev">⌄</span></span>
+        <span class="detail">
+          <p>백일해를 유발하는 세균 샘플을 모으기 시작했습니다. 지역 의사와 간호사들이 환자들의 <strong>cough plates</strong>를 제공했고, 환자들이 <strong>petri dish</strong>에 직접 기침하도록 하여 세균 샘플을 채취했습니다.</p>
+          <div class="info-grid">
+            <div class="illustration"><div class="illus-big">🧫 👩‍⚕️</div><div class="illus-title">핵심 그림</div><div class="illus-text">의사와 간호사가 도와주고, 환자들이 페트리 접시에 기침하여 샘플을 모으는 단계</div></div>
+            <div><div class="keywords"><span class="chip">cough plates</span><span class="chip">petri dish</span><span class="chip">gather samples</span><span class="chip">patients</span></div></div>
+          </div>
+        </span>
+      </button>
+    </div>
+
+    <div class="stage">
+      <span class="node">2</span>
+      <button class="card" aria-expanded="false">
+        <span class="head"><span class="badge">🦠</span><span class="title">2단계 · 배양 및 분석 <span class="eng">Growing & Analyzing</span></span><span class="chev">⌄</span></span>
+        <span class="detail">
+          <p>채취한 페트리 접시를 <strong>incubator</strong>에 넣어 세균이 <strong>colonies</strong> 형태로 자라게 했습니다. 이후 형성된 세균 군집을 정밀하게 <strong>analyze</strong>했습니다.</p>
+          <div class="info-grid">
+            <div class="illustration"><div class="illus-big">🧪 → 🦠</div><div class="illus-title">핵심 그림</div><div class="illus-text">배양기에서 세균이 자라고, 자라난 군집을 분석하는 연구 단계</div></div>
+            <div class="keywords"><span class="chip">incubator</span><span class="chip">colonies</span><span class="chip">analyze</span><span class="chip">grow into colonies</span></div>
+          </div>
+        </span>
+      </button>
+    </div>
+
+    <div class="stage">
+      <span class="node">3</span>
+      <button class="card" aria-expanded="false">
+        <span class="head"><span class="badge">🏠</span><span class="title">3단계 · 현장 방문과 고통의 목격 <span class="eng">Empathy & Resolve</span></span><span class="chev">⌄</span></span>
+        <span class="detail">
+          <p>두 연구자는 직접 샘플을 수집하기 위해 아픈 아이들의 가정을 방문하기도 했습니다. 기침을 하며 숨 쉬기 힘들어하는 어린 환자들의 <strong>dreadful suffering</strong>을 직접 목격하면서, 효과적인 백신 개발의 <strong>urgent need</strong>를 다시 절실하게 깨달았습니다.</p>
+          <div class="info-grid">
+            <div class="illustration"><div class="illus-big">🏠 👧 😷</div><div class="illus-title">핵심 그림</div><div class="illus-text">아이들의 실제 고통을 보며 연구의 필요성을 절감한 단계</div></div>
+            <div class="keywords"><span class="chip">dreadful suffering</span><span class="chip">urgent need</span><span class="chip">sick children</span><span class="chip">home visits</span></div>
+          </div>
+        </span>
+      </button>
+    </div>
+
+    <div class="stage">
+      <span class="node">4</span>
+      <button class="card" aria-expanded="false">
+        <span class="head"><span class="badge">💡</span><span class="title">4단계 · 백신 후보 물질 개발 <span class="eng">Potential Vaccine</span></span><span class="chev">⌄</span></span>
+        <span class="detail">
+          <p>수많은 밤을 지새우며 연구에 매진한 끝에 마침내 <strong>potential vaccine</strong>을 개발하는 데 성공했습니다.</p>
+          <div class="info-grid">
+            <div class="illustration"><div class="illus-big">🌙 🔬 💡</div><div class="illus-title">핵심 그림</div><div class="illus-text">오랜 연구 끝에 드디어 후보 백신을 만들어 낸 순간</div></div>
+            <div class="keywords"><span class="chip">many long nights</span><span class="chip">research</span><span class="chip">potential vaccine</span></div>
+          </div>
+        </span>
+      </button>
+    </div>
+
+    <div class="stage">
+      <span class="node">5</span>
+      <button class="card" aria-expanded="false">
+        <span class="head"><span class="badge">💉</span><span class="title">5단계 · 자가 접종을 통한 안전성 검증 <span class="eng">Self-Testing</span></span><span class="chev">⌄</span></span>
+        <span class="detail">
+          <p>사람을 대상으로 하는 본격적인 <strong>clinical trials</strong> 전에, 백신이 인체에 해로운 <strong>negative side effects</strong>를 일으키지 않는다는 확신이 필요했습니다. 다양한 <strong>laboratory tests</strong> 후, <strong>자신들의 몸에 백신을 직접 주사</strong>하여 안전함을 <strong>confirm</strong>했습니다.</p>
+          <div class="info-grid">
+            <div class="illustration"><div class="illus-big">🧪 ✔️ 💉</div><div class="illus-title">핵심 그림</div><div class="illus-text">실험실 검사 후, 직접 자가 접종까지 감행해 안전성을 검증한 단계</div></div>
+            <div class="keywords"><span class="chip">clinical trials</span><span class="chip">side effects</span><span class="chip">laboratory tests</span><span class="chip">inject</span><span class="chip">confirm</span></div>
+          </div>
+        </span>
+      </button>
+    </div>
+
+    <div class="stage">
+      <span class="node">6</span>
+      <button class="card" aria-expanded="false">
+        <span class="head"><span class="badge">📊</span><span class="title">6단계 · 최초의 현장 임상시험 <span class="eng">The First Field Test · 1934–1935</span></span><span class="chev">⌄</span></span>
+        <span class="detail">
+          <p>안전성을 검증한 뒤, <strong>1934년부터 1935년까지</strong> 1,592명의 어린이를 대상으로 최초의 <strong>field test</strong>를 수행했습니다. 그 결과, 백신을 접종받은 712명의 어린이 중 <strong>단 4명만이 백일해에 걸렸고, 심각한 사례는 0건</strong>이었습니다.</p>
+          <div class="stats">
+            <div class="stat"><div class="num">1,592</div><div class="stat-label">시험에 참여한 어린이</div></div>
+            <div class="stat"><div class="num">712</div><div class="stat-label">vaccinated children</div></div>
+            <div class="stat"><div class="num">4</div><div class="stat-label">developed whooping cough</div></div>
+            <div class="stat"><div class="num">0</div><div class="stat-label">serious cases</div></div>
+          </div>
+          <div class="keywords"><span class="chip">field test</span><span class="chip">vaccinated</span><span class="chip">developed whooping cough</span><span class="chip">successful result</span></div>
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <section class="footer-note">
+    <h3>TAKEAWAY</h3>
+    <p><strong>샘플 수집 → 배양·분석 → 공감과 결의 → 후보 백신 개발 → 안전성 검증 → 현장시험</strong>의 흐름을 통해, 켄드릭과 엘더링은 과학적 연구와 인간적 공감이 함께 만들어 낸 백신 개발의 과정을 보여주었습니다.</p>
+  </section>
+</div>
+
+<script>
+(() => {
+  const cards = [...document.querySelectorAll('.card')];
+  function setAll(v){ cards.forEach(c => c.setAttribute('aria-expanded', v ? 'true' : 'false')); }
+  cards.forEach(card => card.addEventListener('click', () => {
+    const open = card.getAttribute('aria-expanded') === 'true';
+    card.setAttribute('aria-expanded', open ? 'false' : 'true');
+  }));
+  document.getElementById('openAll').addEventListener('click', () => setAll(true));
+  document.getElementById('closeAll').addEventListener('click', () => setAll(false));
+  document.getElementById('firstOnly').addEventListener('click', () => {
+    setAll(false);
+  });
+})();
+</script>
+<script>
+document.getElementById('firstOnly').addEventListener('click', () => {
+  const cards = [...document.querySelectorAll('.card')];
+  cards.forEach((c, i) => c.setAttribute('aria-expanded', i === 0 ? 'true' : 'false'));
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+</script>
+</body>
+</html>
